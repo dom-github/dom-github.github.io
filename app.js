@@ -2738,13 +2738,13 @@ function update(timestamp) {
 
     //fps counter
     const fps = Math.trunc(60 * deltaTime);
-    context.font = "42px serif";
+    vctx.font = "42px serif";
     if(fps < 50) {
-        context.fillStyle = "#ff00ff";
+        vctx.fillStyle = "#ff00ff";
     }else if(fps < 30){
-        context.fillStyle = "#ff0000";
+        vctx.fillStyle = "#ff0000";
     }
-    context.fillText(`${fps}`, 10, 30)
+    vctx.fillText(`${fps}`, 10, 30)
 
     //spideyPos.x += 0.5;
     // const input1 = false;
