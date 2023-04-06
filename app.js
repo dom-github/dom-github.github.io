@@ -5,7 +5,8 @@ const viewport = document.getElementById("viewport");
 const context = canvas.getContext("2d");
 const vctx = viewport.getContext("2d");
 
-
+vctx.scale(2, 2)
+// context.scale(2, 2)
 
 const perfectFrameTime = 1000 / 60;
 var deltaTime = 0;
@@ -577,15 +578,25 @@ CanvasRenderingContext2D.prototype.fillCircle = function (x,y,r) {
 
 //canvas.addEventListener('click', clickFunction, false);
 //canvas.addEventListener('mouserelease', function(){console.log('mouserel')}, false);
+
+function ongoingTouchIndexById(idToFind) {
+    for (let i = 0; i < ongoingTouches.length; i++) {
+      const id = ongoingTouches[ i ].identifier;
+  
+      if (id == idToFind) {
+        return i;
+      }
+    }
+    return -1;    // not found
+  }
+
 function touchStart(evt) {
     evt.preventDefault();
-    log("touchstart.");
-    const el = document.getElementById("canvas");
-    const ctx = el.getContext("2d");
+    console.log("touchstart.");
     const touches = evt.changedTouches;
   
     for (let i = 0; i < touches.length; i++) {
-      log(`touchstart: ${i}.`);
+        console.log(`touchstart: ${i}.`);
       ongoingTouches.push(copyTouch(touches[i]));
     }
   }
@@ -595,7 +606,7 @@ function touchStart(evt) {
   }
   function touchCancel(evt) {
     evt.preventDefault();
-    log("touchcancel.");
+    console.log("touchcancel.");
     const touches = evt.changedTouches;
   
     for (let i = 0; i < touches.length; i++) {
@@ -605,38 +616,32 @@ function touchStart(evt) {
   }
   function touchMove(evt) {
     evt.preventDefault();
-    const el = document.getElementById("canvas");
-    const ctx = el.getContext("2d");
     const touches = evt.changedTouches;
   
     for (let i = 0; i < touches.length; i++) {
-      const color = colorForTouch(touches[i]);
       const idx = ongoingTouchIndexById(touches[i].identifier);
   
       if (idx >= 0) {
   
         ongoingTouches.splice(idx, 1, copyTouch(touches[i])); // swap in the new touch record
       } else {
-        log("can't figure out which touch to continue");
+        console.log("can't figure out which touch to continue");
       }
     }
   }
 
   function touchEnd(evt) {
     evt.preventDefault();
-    log("touchend");
-    const el = document.getElementById("canvas");
-    const ctx = el.getContext("2d");
+    console.log("touchend");
     const touches = evt.changedTouches;
   
     for (let i = 0; i < touches.length; i++) {
-      const color = colorForTouch(touches[i]);
       let idx = ongoingTouchIndexById(touches[i].identifier);
   
       if (idx >= 0) {
         ongoingTouches.splice(idx, 1); // remove it; we're done
       } else {
-        log("can't figure out which touch to end");
+        console.log("can't figure out which touch to end");
       }
     }
   }
@@ -2711,13 +2716,16 @@ function update(timestamp) {
     lastTimestamp = timestamp;
     
     //reset frame
+    context.clearRect(0, 0, canvas.clientWidth, canvas.height);
     vctx.clearRect(0, 0, viewport.clientWidth, viewport.height);
 
-    const w = viewport.width;
-    const h = viewport.height;
+    const w = viewport.width/2;
+    const h = viewport.height/2;
+
+    //source, sourceXY, WH, destXY, dWH
     vctx.drawImage(canvas, 
         Math.max(0,Math.min(spideyPos.x - (w * 0.5), canvas.width - w)), Math.min(spideyPos.y - (h * 0.5), canvas.height - h), w, h, 
-        0, 0, viewport.width, viewport.height)
+        0, 0, w, h)
 
     //player movement
     move();
@@ -2737,7 +2745,7 @@ function update(timestamp) {
     processAI();
 
     //fps counter
-    const fps = Math.trunc(60 * deltaTime);
+    const fps = Math.trunc(Math.round(60 * deltaTime));
     vctx.font = "42px serif";
     if(fps < 50) {
         vctx.fillStyle = "#ff00ff";
@@ -2751,11 +2759,11 @@ function update(timestamp) {
     // const input2 = false;
 
     if(upPressed && !downPressed && !legMods.every(x => {return x.anim !== grabbing && x.anim !== walking})) {
-        setSpeed(0, -1.2);
+        setSpeed(0, -1.5);
         
     }
     if(downPressed && !upPressed && !legMods.every(x => {return x.anim === swinging})) {
-        setSpeed(0, 1.2);
+        setSpeed(0, 1.5);
         // spideyPos.y += (1 * deltaTime);
         // for (let i=0; i < legMods.length; i++) {
         //     legMods[i].y -= (1 * deltaTime);
@@ -2764,7 +2772,7 @@ function update(timestamp) {
     }
 
     if(rightPressed && !leftPressed) {
-        setSpeed(1.2, 0);
+        setSpeed(1.5, 0);
         // spideyPos.x += (1 * deltaTime);
         // for (let i=0; i < legMods.length; i++) {
         //     legMods[i].x -= (1 * deltaTime);
@@ -2772,7 +2780,7 @@ function update(timestamp) {
         // }
     }
     if(leftPressed && !rightPressed) {
-        setSpeed(-1.2, 0);
+        setSpeed(-1.5, 0);
         // spideyPos.x -= (1 * deltaTime);
         // for (let i=0; i < legMods.length; i++) {
         //     legMods[i].x += (1 * deltaTime);
