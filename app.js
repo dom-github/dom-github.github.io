@@ -2,12 +2,12 @@
 
 const canvas = document.getElementById("worldCanvas");
 const viewport = document.getElementById("viewport");
-// viewport.id = "viewport";
-// viewport.width = window.innerWidth;
-// viewport.height = window.innerHeight;
+viewport.id = "viewport";
+viewport.width = window.innerWidth;
+viewport.height = window.innerHeight;
 
 const background = document.getElementById('background');
-background.width = 15360;
+background.width = 7680;
 background.height = 2160;
 
 
@@ -2742,8 +2742,8 @@ function update(timestamp) {
 
     drawEnemies();
 
-    const w = viewport.width/2;
-    const h = viewport.height/2;
+    const w = viewport.width/4;
+    const h = viewport.height/4;
     //source, sourceXY, WH, destXY, dWH
     vctx.drawImage(canvas, 
         Math.max(0,Math.min(spideyPos.x - (w * 0.5), canvas.width - w)), Math.min(spideyPos.y - (h * 0.5), canvas.height - h), w, h, 
