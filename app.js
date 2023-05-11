@@ -2,10 +2,22 @@
 
 const canvas = document.getElementById("worldCanvas");
 const viewport = document.getElementById("viewport");
+// viewport.id = "viewport";
+// viewport.width = window.innerWidth;
+// viewport.height = window.innerHeight;
+
+const background = document.getElementById('background');
+background.width = 15360;
+background.height = 2160;
+
+
 const context = canvas.getContext("2d");
 const vctx = viewport.getContext("2d");
 
-vctx.scale(2, 2)
+const bgctx = background.getContext("2d");
+
+
+//vctx.scale(2, 2)
 // context.scale(2, 2)
 
 const perfectFrameTime = 1000 / 60;
@@ -263,12 +275,13 @@ function getNearestWalkLine(x, y){
 
 let LMBHeld = 0;
 let RMBHeld = 0;
-
 function mousedown(e){
     if(mouseFocus) {
-        mouseCursor.x = !LMBHeld && !RMBHeld ? spideyPos.x : mouseCursor.x;
-        mouseCursor.y = !LMBHeld && !RMBHeld ? spideyPos.y : mouseCursor.y;
-        cursorPos = new Vector(mouseCursor.x - spideyPos.x, mouseCursor.y - spideyPos.y)
+        const w = viewport.width;
+        const h = viewport.height;
+        mouseCursor.x = !LMBHeld && !RMBHeld ? 0 : mouseCursor.x// + Math.max(0,Math.min(spideyPos.x - (w * 0.5), canvas.width - w));
+        mouseCursor.y = !LMBHeld && !RMBHeld ? 0 : mouseCursor.y// + Math.min(spideyPos.y - (h * 0.5), canvas.height - h);
+        cursorPos = new Vector(mouseCursor.x, mouseCursor.y)
         cursorPos = cursorPos.scaleBy(Math.min(1,spideyRadius / cursorPos.length()))
         const moveX = mousedir.components[0] * spideyRadius;
         const moveY = mousedir.components[1] * spideyRadius;
@@ -324,11 +337,11 @@ function mousedown(e){
     
 }
 function mouseup(e){
-    if (e.button === 0 && mouseFocus){
+    if (mouseFocus && e.button === 0){
         console.log(lastTimestamp - LMBHeld)
         LMBHeld = 0;
         layWeb? placeWeb() : startWeb();
-    } else if (e.button === 2 && mouseFocus) {
+    } else if (mouseFocus && e.button === 2) {
         console.log(lastTimestamp - RMBHeld);
         RMBHeld = 0;
         stopWeb();
@@ -346,17 +359,7 @@ function startWeb(){
     const ty = cursorPos.components[1] + spideyPos.y;
     //console.log("start");
     let walkArea = false;
-    let enemyHit = false;
 
-        enemies.forEach((x) => {
-            const intersect = intersection({x: tx, 
-                y: ty, r: spideyRadius/4}, {x: x.x, y: x.y, r: spideyRadius/4})
-                if(intersect.intersect_occurs) {
-                    console.log(intersect)
-                    x.active = false;
-                    enemyHit = true;
-                };
-        })
             //walkAreas
             areaCircles.forEach((x) => {
                 const intersect = intersection({x: tx, 
@@ -403,19 +406,8 @@ function stopWeb(){
     const tx = cursorPos.components[0] + spideyPos.x;
     const ty = cursorPos.components[1] + spideyPos.y;
     
-    let enemyHit = false;
 
-        enemies.forEach((x) => {
-            const intersect = intersection({x: tx, 
-                y: ty, r: spideyRadius/4}, {x: x.x, y: x.y, r: spideyRadius/4})
-                if(intersect.intersect_occurs) {
-                    console.log(intersect)
-                    x.active = false;
-                    enemyHit = true;
-                };
-        })
-
-    if(!enemyHit && Math.hypot(cursorPos.components[0], cursorPos.components[1]) < spideyRadius/5) {
+    if(Math.hypot(cursorPos.components[0], cursorPos.components[1]) < spideyRadius/5) {
         layWeb = false;
     }
     
@@ -432,17 +424,6 @@ function placeWeb(){
     const ty = cursorPos.components[1] + spideyPos.y;
     //console.log("end");
     let walkArea = false;
-    let enemyHit = false;
-
-        enemies.forEach((x) => {
-            const intersect = intersection({x: tx, 
-                y: ty, r: 8}, {x: x.x, y: x.y, r: spideyRadius/4})
-                if(intersect.intersect_count > 0) {
-                    console.log(intersect)
-                    x.active = false;
-                    enemyHit = true;
-                };
-        })
         //walkAreas
         areaCircles.forEach((x) => {
             const intersect = intersection({x: tx, 
@@ -496,7 +477,7 @@ function drawCursor() {
    //console.log(mouseCursor.lastMove, lastTimestamp)
     // if (mouseCursor.lastMove > 0 && lastTimestamp - mouseCursor.lastMove < 700){
     if (LMBHeld || RMBHeld){
-        if (dist2({x: mouseCursor.x, y: mouseCursor.y},
+        if (dist2({x: mouseCursor.x + spideyPos.x, y: mouseCursor.y + spideyPos.y},
                 {x: spideyPos.x, y: spideyPos.y}) < spideyRadius*spideyRadius){
         context.strokeStyle = 'rgba(255, 255, 255, 1)';
     }   else {
@@ -504,8 +485,8 @@ function drawCursor() {
     }
     context.lineWidth = 3;
     context.beginPath();
-    context.strokeCircle(mouseCursor.x, mouseCursor.y, 8);
-    context.strokeCircle(mouseCursor.x, mouseCursor.y, 3);
+    context.strokeCircle(mouseCursor.x + spideyPos.x, mouseCursor.y + spideyPos.y, 8);
+    context.strokeCircle(mouseCursor.x + spideyPos.x, mouseCursor.y + spideyPos.y, 3);
     // context.strokeCircle(cursorPos.components[0] + spideyPos.x, cursorPos.components[1] + spideyPos.y, 8);
     // context.strokeCircle(cursorPos.components[0] + spideyPos.x, cursorPos.components[1] + spideyPos.y, 3);
     context.strokeStyle = '#000000';
@@ -529,7 +510,7 @@ function mouseMove(e){
     mouseCursor.y += e.movementY;
     mouseCursor.lastMove = lastTimestamp;
     mousedir = new Vector(e.movementX, e.movementY)
-    cursorPos = new Vector(mouseCursor.x - spideyPos.x, mouseCursor.y - spideyPos.y)
+    cursorPos = new Vector(mouseCursor.x, mouseCursor.y)
     cursorPos = cursorPos.scaleBy(Math.min(1,spideyRadius / cursorPos.length()))
     //console.log(e)
 }
@@ -539,11 +520,11 @@ let mouseFocus = false;
 function lockChangeAlert() {
     if (document.pointerLockElement === viewport) {
         mouseFocus = true;
-        console.log("The pointer lock status is now locked");
+        //console.log("The pointer lock status is now locked");
         document.addEventListener("mousemove", mouseMove, false);
     } else {
         mouseFocus = false;
-        console.log("The pointer lock status is now unlocked");
+        //console.log("The pointer lock status is now unlocked");
         document.removeEventListener("mousemove", mouseMove, false);
     }
 }
@@ -763,7 +744,7 @@ function mulberry32(a) {
 function paintGround(id, length){
     
     // Create gradient
-    var sky = context.createLinearGradient(0, 0, 0, canvas.height);
+    var sky = bgctx.createLinearGradient(0, 0, 0, canvas.height);
     //dusk-y FFC9D6 FFF3E5
     // sky.addColorStop(0, "#FFC9D6");
     // sky.addColorStop(0.5, "#FFF3E5");
@@ -771,39 +752,39 @@ function paintGround(id, length){
     sky.addColorStop(0.5, "#93CBFF");
 
     // Fill with gradient
-    context.fillStyle = sky;
-    context.fillRect(0, 0, canvas.width, canvas.height);
+    bgctx.fillStyle = sky;
+    bgctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const random = mulberry32(id + length)();
     //background
     const box = areaBoxes[id]
-    var bkgrd = context.createLinearGradient(0, box.p2.y * 0.95, 0, canvas.height);
+    var bkgrd = bgctx.createLinearGradient(0, box.p2.y * 0.95, 0, canvas.height);
     // bkgrd.addColorStop(0.1, 'rgba(221, 135, 107, 0.5)'); //221 185 157 //#DDB99D
     // bkgrd.addColorStop(0.5, 'rgba(226, 208, 140, 1)'); //#E2D08C //
     bkgrd.addColorStop(0.1, 'rgba(221, 200, 107, 0.5)'); 
     bkgrd.addColorStop(0.5, 'rgba(226, 208, 140, 1)'); 
-    context.fillStyle = bkgrd;
-    context.fillRect(box.p1.x, box.p2.y * 0.95, box.p2.x, box.p1.y); 
-    context.beginPath();
-    context.moveTo(box.p1.x, box.p2.y)
-    context.bezierCurveTo(canvas.width * random, box.p2.y - (150 * random), canvas.width* 2 * random, canvas.height - (150 * random), canvas.width, canvas.height)
-    context.fill();
+    bgctx.fillStyle = bkgrd;
+    bgctx.fillRect(box.p1.x, box.p2.y * 0.95, box.p2.x, box.p1.y); 
+    bgctx.beginPath();
+    bgctx.moveTo(box.p1.x, box.p2.y)
+    bgctx.bezierCurveTo(canvas.width * random, box.p2.y - (150 * random), canvas.width* 2 * random, canvas.height - (150 * random), canvas.width, canvas.height)
+    bgctx.fill();
     
     
     
-    //context.fillStyle = "#FFE57F";
+    //bgctx.fillStyle = "#FFE57F";
     //grd
-    var hill = context.createLinearGradient(0, box.p2.y * 0.95, 0, canvas.height)
+    var hill = bgctx.createLinearGradient(0, box.p2.y * 0.95, 0, canvas.height)
     hill.addColorStop(0, "#FFF3C9");
     hill.addColorStop(1, "#FFE57F");
-    context.fillStyle = hill;
-    context.fillRect(box.p1.x, box.p2.y, box.p2.x, box.p1.y);
-    context.beginPath();
-    context.moveTo(box.p1.x, box.p2.y)
-    context.bezierCurveTo(canvas.width * random, box.p2.y - (80*random), canvas.width * random, canvas.height - (80 * random), canvas.width, canvas.height)
-    context.fill();
+    bgctx.fillStyle = hill;
+    bgctx.fillRect(box.p1.x, box.p2.y, box.p2.x, box.p1.y);
+    bgctx.beginPath();
+    bgctx.moveTo(box.p1.x, box.p2.y)
+    bgctx.bezierCurveTo(canvas.width * random, box.p2.y - (80*random), canvas.width * random, canvas.height - (80 * random), canvas.width, canvas.height)
+    bgctx.fill();
     
-    context.fillStyle = "#000000";
+    bgctx.fillStyle = "#000000";
 };
 
 //lets draw a rock
@@ -844,22 +825,22 @@ function drawRockMed(x,y,s,r){
 
 //id is the array ID from 1st boundary + number of boundaries in obj
 function paintRockMed(id, len){
-    context.fillStyle = "#C0C0C0";
-    context.strokeStyle = "#707070";
-    context.lineWidth = 3;
+    bgctx.fillStyle = "#C0C0C0";
+    bgctx.strokeStyle = "#707070";
+    bgctx.lineWidth = 3;
 
-    context.beginPath();
-    context.moveTo(boundaryColliders[id].p1.x, boundaryColliders[id].p1.y);
-    context.lineTo(boundaryColliders[id].p2.x, boundaryColliders[id].p2.y);
+    bgctx.beginPath();
+    bgctx.moveTo(boundaryColliders[id].p1.x, boundaryColliders[id].p1.y);
+    bgctx.lineTo(boundaryColliders[id].p2.x, boundaryColliders[id].p2.y);
     for(i = id+1; i < id + len; i++){
         const obj = boundaryColliders[i]
-        context.lineTo(obj.p1.x, obj.p1.y);
-        context.lineTo(obj.p2.x, obj.p2.y);
+        bgctx.lineTo(obj.p1.x, obj.p1.y);
+        bgctx.lineTo(obj.p2.x, obj.p2.y);
     }
-    context.fill();
-    context.stroke();
-    context.strokeStyle = "#000000";
-    context.fillStyle = "#000000";
+    bgctx.fill();
+    bgctx.stroke();
+    bgctx.strokeStyle = "#000000";
+    bgctx.fillStyle = "#000000";
 }
 
 //lets draw a stop sign
@@ -910,40 +891,40 @@ function drawStopSign(x,y,s){
 }
 
 function paintStopSign(id, len){
-    context.fillStyle = "#7E8BA8";
-    context.strokeStyle = "#393939";
-    context.lineWidth = 2;
+    bgctx.fillStyle = "#7E8BA8";
+    bgctx.strokeStyle = "#393939";
+    bgctx.lineWidth = 2;
 
-    context.beginPath();
-    context.moveTo(boundaryColliders[id].p1.x, boundaryColliders[id].p1.y);
-    context.lineTo(boundaryColliders[id].p2.x, boundaryColliders[id].p2.y);
-    context.lineTo(boundaryColliders[id+1].p1.x, boundaryColliders[id+1].p1.y);
-    context.lineTo(boundaryColliders[id+1].p2.x, boundaryColliders[id+1].p2.y);
-    context.stroke();
-    context.fill();
-    context.fillStyle = "#BA2A2A";
-    context.strokeStyle = "#ffffff";
-    context.lineWidth = 9;
-    context.beginPath();
-    context.moveTo(boundaryColliders[id+2].p1.x, boundaryColliders[id+2].p1.y);
-    context.lineTo(boundaryColliders[id+2].p2.x + 3, boundaryColliders[id+2].p2.y);
+    bgctx.beginPath();
+    bgctx.moveTo(boundaryColliders[id].p1.x, boundaryColliders[id].p1.y);
+    bgctx.lineTo(boundaryColliders[id].p2.x, boundaryColliders[id].p2.y);
+    bgctx.lineTo(boundaryColliders[id+1].p1.x, boundaryColliders[id+1].p1.y);
+    bgctx.lineTo(boundaryColliders[id+1].p2.x, boundaryColliders[id+1].p2.y);
+    bgctx.stroke();
+    bgctx.fill();
+    bgctx.fillStyle = "#BA2A2A";
+    bgctx.strokeStyle = "#ffffff";
+    bgctx.lineWidth = 9;
+    bgctx.beginPath();
+    bgctx.moveTo(boundaryColliders[id+2].p1.x, boundaryColliders[id+2].p1.y);
+    bgctx.lineTo(boundaryColliders[id+2].p2.x + 3, boundaryColliders[id+2].p2.y);
     for(i = id+3; i < id + len; i++){
         const obj = boundaryColliders[i]
-        context.lineTo(obj.p1.x, obj.p1.y);
-        context.lineTo(obj.p2.x, obj.p2.y);
+        bgctx.lineTo(obj.p1.x, obj.p1.y);
+        bgctx.lineTo(obj.p2.x, obj.p2.y);
     }
-    context.fill();
-    context.stroke();
+    bgctx.fill();
+    bgctx.stroke();
 
     
-    context.fillStyle = "#ffffff";
-    context.font = "85px sans-serif";
-    context.textAlign = "center";
-    context.fillText("STOP", 
+    bgctx.fillStyle = "#ffffff";
+    bgctx.font = "85px sans-serif";
+    bgctx.textAlign = "center";
+    bgctx.fillText("STOP", 
     boundaryColliders[id+2].p1.x - (boundaryColliders[id+2].p1.x - boundaryColliders[id+2].p2.x)*0.5, 
     boundaryColliders[id+4].p2.y + (boundaryColliders[id+4].p1.y - boundaryColliders[id+4].p2.y)*0.75) 
 
-    context.fillStyle = "#000000";
+    bgctx.fillStyle = "#000000";
 }
 
 // let's draw a cactusÊÊÊ
@@ -1040,9 +1021,9 @@ function paintStopSign(id, len){
     // ex. 
 
     function paintCactus(id, len, cid, clen){
-        context.fillStyle = "#7FD87F"; //EAFFEB D6FFD6
-        context.strokeStyle = "#539B58";
-        context.lineWidth = 3;
+        bgctx.fillStyle = "#7FD87F"; //EAFFEB D6FFD6
+        bgctx.strokeStyle = "#539B58";
+        bgctx.lineWidth = 3;
 
         let width = boundaryCircles[cid].r;
         let top = boundaryCircles[cid].y - width;
@@ -1051,92 +1032,92 @@ function paintStopSign(id, len){
     
         for(i = cid; i < cid + clen; i++){
             const obj = boundaryCircles[i];
-            context.fillCircle(obj.x, obj.y, obj.r)
+            bgctx.fillCircle(obj.x, obj.y, obj.r)
             
         }
         
-        context.beginPath();
-        context.moveTo(boundaryColliders[id].p1.x, boundaryColliders[id].p1.y);
-        context.lineTo(boundaryColliders[id].p2.x, boundaryColliders[id].p2.y);
+        bgctx.beginPath();
+        bgctx.moveTo(boundaryColliders[id].p1.x, boundaryColliders[id].p1.y);
+        bgctx.lineTo(boundaryColliders[id].p2.x, boundaryColliders[id].p2.y);
         for(i = id+1; i < id + len; i++){
             const obj = boundaryColliders[i]
-            context.lineTo(obj.p1.x, obj.p1.y);
-            context.lineTo(obj.p2.x, obj.p2.y);
+            bgctx.lineTo(obj.p1.x, obj.p1.y);
+            bgctx.lineTo(obj.p2.x, obj.p2.y);
         }
-        context.fill();
+        bgctx.fill();
         
         //outline
-        context.beginPath();
-        //context.moveTo(boundaryColliders[id].p1.x, boundaryColliders[id].p1.y);
+        bgctx.beginPath();
+        //bgctx.moveTo(boundaryColliders[id].p1.x, boundaryColliders[id].p1.y);
         for(i = id; i < id + len; i++){
             const obj = boundaryColliders[i]
-                context.moveTo(obj.p1.x, obj.p1.y);
-                context.lineTo(obj.p2.x, obj.p2.y);
+                bgctx.moveTo(obj.p1.x, obj.p1.y);
+                bgctx.lineTo(obj.p2.x, obj.p2.y);
             }
-        //context.setLineDash([15, 10, 5, 10]);
-        context.stroke()
+        //bgctx.setLineDash([15, 10, 5, 10]);
+        bgctx.stroke()
         for(i = cid; i < cid + clen; i++){
             const obj = boundaryCircles[i];
             
-            context.strokeHalfCircle(obj.x, obj.y, obj.r)
+            bgctx.strokeHalfCircle(obj.x, obj.y, obj.r)
         }
 
         //needles
         //body
-        context.beginPath();
-        context.setLineDash([5, 15]);
-        context.moveTo(middle, top)
-        context.lineTo(middle, bottom)
-        context.stroke();
-        context.beginPath();
-        context.moveTo(middle, top)
-        context.quadraticCurveTo(middle + width, top - width, middle + width*0.5, bottom)
-        context.stroke();
-        context.beginPath();
-        context.moveTo(middle, top)
-        context.quadraticCurveTo(middle - width, top - width, middle - width*0.5, bottom)
-        context.stroke();
+        bgctx.beginPath();
+        bgctx.setLineDash([5, 15]);
+        bgctx.moveTo(middle, top)
+        bgctx.lineTo(middle, bottom)
+        bgctx.stroke();
+        bgctx.beginPath();
+        bgctx.moveTo(middle, top)
+        bgctx.quadraticCurveTo(middle + width, top - width, middle + width*0.5, bottom)
+        bgctx.stroke();
+        bgctx.beginPath();
+        bgctx.moveTo(middle, top)
+        bgctx.quadraticCurveTo(middle - width, top - width, middle - width*0.5, bottom)
+        bgctx.stroke();
         
         //right arm
         bottom = boundaryColliders[id+8].p1.y;
         width = boundaryCircles[cid+1].r;
         top = boundaryCircles[cid+1].y - width;
         middle = boundaryCircles[cid+1].x;
-        context.setLineDash([5, 20]);
-        context.beginPath();
-        context.moveTo(middle, top)
-        context.quadraticCurveTo(middle, top, middle, bottom)
-        context.stroke();
-        context.beginPath();
-        context.moveTo(middle, top)
-        context.quadraticCurveTo(middle - width, top, middle - width*0.5, bottom)
-        context.stroke();
-        context.beginPath();
-        context.moveTo(middle, top)
-        context.quadraticCurveTo(middle + width, top, middle + width*0.5, bottom)
-        context.stroke();
-        context.beginPath();
-        context.moveTo(middle, top)
-        context.quadraticCurveTo(middle + width, top, middle + width*0.5, bottom)
-        context.stroke();
+        bgctx.setLineDash([5, 20]);
+        bgctx.beginPath();
+        bgctx.moveTo(middle, top)
+        bgctx.quadraticCurveTo(middle, top, middle, bottom)
+        bgctx.stroke();
+        bgctx.beginPath();
+        bgctx.moveTo(middle, top)
+        bgctx.quadraticCurveTo(middle - width, top, middle - width*0.5, bottom)
+        bgctx.stroke();
+        bgctx.beginPath();
+        bgctx.moveTo(middle, top)
+        bgctx.quadraticCurveTo(middle + width, top, middle + width*0.5, bottom)
+        bgctx.stroke();
+        bgctx.beginPath();
+        bgctx.moveTo(middle, top)
+        bgctx.quadraticCurveTo(middle + width, top, middle + width*0.5, bottom)
+        bgctx.stroke();
         
         //right arm lower
         width = boundaryColliders[id+7].p1.x;
         top = boundaryColliders[id+7].p1.y;
         middle = boundaryColliders[id+7].p2.x + boundaryCircles[cid+1].r * 0.5;
         bottom = boundaryColliders[id+7].p2.y + boundaryCircles[cid+1].r * 0.2;
-        context.beginPath();
-        context.moveTo(width, top)
-        context.quadraticCurveTo(middle, top, middle, bottom)
-        context.stroke();
+        bgctx.beginPath();
+        bgctx.moveTo(width, top)
+        bgctx.quadraticCurveTo(middle, top, middle, bottom)
+        bgctx.stroke();
         width = boundaryColliders[id+7].p1.x;
         top = boundaryColliders[id+7].p1.y + boundaryCircles[cid+1].r;
         middle = boundaryColliders[id+7].p2.x + boundaryCircles[cid+1].r;
         bottom = boundaryColliders[id+7].p2.y + boundaryCircles[cid+1].r * 0.2;
-        context.beginPath();
-        context.moveTo(width, top)
-        context.quadraticCurveTo(middle, top, middle, bottom)
-        context.stroke();
+        bgctx.beginPath();
+        bgctx.moveTo(width, top)
+        bgctx.quadraticCurveTo(middle, top, middle, bottom)
+        bgctx.stroke();
 
         
         //left arm
@@ -1144,40 +1125,40 @@ function paintStopSign(id, len){
         width = boundaryCircles[cid+2].r;
         top = boundaryCircles[cid+2].y - width;
         middle = boundaryCircles[cid+2].x;
-        // context.beginPath();
-        // context.moveTo(middle, top)
-        // context.quadraticCurveTo(middle, top, middle, bottom)
-        // context.stroke();
-        context.beginPath();
-        context.moveTo(middle, top)
-        context.quadraticCurveTo(middle - width, top, middle - width*0.5, bottom)
-        context.stroke();
-        context.beginPath();
-        context.moveTo(middle, top)
-        context.quadraticCurveTo(middle + width, top, middle + width*0.5, bottom)
-        context.stroke();
+        // bgctx.beginPath();
+        // bgctx.moveTo(middle, top)
+        // bgctx.quadraticCurveTo(middle, top, middle, bottom)
+        // bgctx.stroke();
+        bgctx.beginPath();
+        bgctx.moveTo(middle, top)
+        bgctx.quadraticCurveTo(middle - width, top, middle - width*0.5, bottom)
+        bgctx.stroke();
+        bgctx.beginPath();
+        bgctx.moveTo(middle, top)
+        bgctx.quadraticCurveTo(middle + width, top, middle + width*0.5, bottom)
+        bgctx.stroke();
         //left arm lower
         width = boundaryColliders[id+1].p2.x + boundaryCircles[cid+2].r;
         top = boundaryColliders[id+1].p2.y - boundaryCircles[cid+2].r * 0.5;
         middle = boundaryColliders[id+1].p1.x + boundaryCircles[cid+2].r;
         bottom = boundaryColliders[id+1].p1.y - boundaryCircles[cid+2].r * 0.5;
-        context.setLineDash([5, 25]);
-        context.beginPath();
-        context.moveTo(width, top)
-        context.quadraticCurveTo(middle, bottom, middle, bottom)
-        context.stroke();
+        bgctx.setLineDash([5, 25]);
+        bgctx.beginPath();
+        bgctx.moveTo(width, top)
+        bgctx.quadraticCurveTo(middle, bottom, middle, bottom)
+        bgctx.stroke();
         width = boundaryColliders[id+1].p2.x + boundaryCircles[cid+2].r * 2;
         top = boundaryColliders[id+1].p2.y - boundaryCircles[cid+2].r;
         middle = boundaryColliders[id+1].p1.x + boundaryCircles[cid+2].r;
         bottom = boundaryColliders[id+1].p1.y - boundaryCircles[cid+2].r;
-        context.beginPath();
-        context.moveTo(width, top)
-        context.quadraticCurveTo(middle, bottom, middle, bottom)
-        context.stroke();
+        bgctx.beginPath();
+        bgctx.moveTo(width, top)
+        bgctx.quadraticCurveTo(middle, bottom, middle, bottom)
+        bgctx.stroke();
 
-        context.fillStyle = "#000000";
-        context.strokeStyle = "#000000";
-        context.setLineDash([]);
+        bgctx.fillStyle = "#000000";
+        bgctx.strokeStyle = "#000000";
+        bgctx.setLineDash([]);
     }
 
 //lets make a spidey boi
@@ -1280,6 +1261,16 @@ var legMods = [
 //16 lines (32 pts) relative to spideypos within radius
 //valid for spidey feetsies
 var walkLines = [
+    {p1: {x: 0, y: 0}, p2: {x: 0, y: 0}, valid: false},
+    {p1: {x: 0, y: 0}, p2: {x: 0, y: 0}, valid: false},
+    {p1: {x: 0, y: 0}, p2: {x: 0, y: 0}, valid: false},
+    {p1: {x: 0, y: 0}, p2: {x: 0, y: 0}, valid: false},
+
+    {p1: {x: 0, y: 0}, p2: {x: 0, y: 0}, valid: false},
+    {p1: {x: 0, y: 0}, p2: {x: 0, y: 0}, valid: false},
+    {p1: {x: 0, y: 0}, p2: {x: 0, y: 0}, valid: false},
+    {p1: {x: 0, y: 0}, p2: {x: 0, y: 0}, valid: false},
+
     {p1: {x: 0, y: 0}, p2: {x: 0, y: 0}, valid: false},
     {p1: {x: 0, y: 0}, p2: {x: 0, y: 0}, valid: false},
     {p1: {x: 0, y: 0}, p2: {x: 0, y: 0}, valid: false},
@@ -1783,7 +1774,7 @@ function drawSpidey(x, y) {
 
         if (legMods[i].anim === readyWeb || legMods[i].anim === readyStrike || legMods[i].anim === throwWeb || legMods[i].anim === throwStrike ) {
             
-            const dur = legMods[i].anim === readyWeb || legMods[i].anim === readyStrike ? 150 : 60;
+            const dur = legMods[i].anim === readyWeb || legMods[i].anim === readyStrike ? 200 : 80;
             const sec = Math.min(elapsed/dur, 1);  
             const step = sec * sec * (3-2 * sec);
 
@@ -1795,6 +1786,19 @@ function drawSpidey(x, y) {
             
             if(legMods[i].anim === throwWeb){
                 ay = -(100 * ((yrotation / 2) / (spideyRadius / 3))) * (0.5 - Math.abs(0.5 - step));
+            }
+            
+            if(legMods[i].anim === throwWeb || legMods[i].anim === throwStrike ){
+                //let enemyHit = false;
+                enemies.forEach((x) => {
+                    const intersect = intersection({x: spideyPos.x + spideyLegs[i].x + legMods[i].x, 
+                        y: spideyPos.y + spideyLegs[i].y + legMods[i].y, r: spideyRadius/5}, {x: x.x, y: x.y, r: spideyRadius/4})
+                        if(intersect.intersect_count > 0) {
+                            console.log(intersect)
+                            x.active = false;
+                            //enemyHit = true;
+                        };
+                })
             }
             
 
@@ -2262,19 +2266,19 @@ function gravity() {
                     walkLines[line].p1.y = grab1.y;
                     walkLines[line].p2.x = grab1.x - (grab1.x * circDepth/2);
                     walkLines[line].p2.y = grab1.y - (grab1.y * circDepth/2);
-                    line < 8 ? line++ : line;
+                    line < 16 ? line++ : line;
                     walkLines[line].valid = true;
                     walkLines[line].p1.x = grab2.x;
                     walkLines[line].p1.y = grab2.y;
                     walkLines[line].p2.x = grab2.x - (grab2.x * circDepth/2);
                     walkLines[line].p2.y = grab2.y - (grab2.y * circDepth/2);
-                    line < 8 ? line++ : line;
+                    line < 16 ? line++ : line;
                     walkLines[line].valid = true;
                     walkLines[line].p1.x = grab1.x - (grab1.x * circDepth/2);
                     walkLines[line].p1.y = grab1.y - (grab1.y * circDepth/2);
                     walkLines[line].p2.x = grab2.x - (grab2.x * circDepth/2);
                     walkLines[line].p2.y = grab2.y - (grab2.y * circDepth/2);
-                    line < 8 ? line++ : line;
+                    line < 16 ? line++ : line;
                     //boundaryColliders.push({...walkLines[0], solid:true} )
                     //console.log(xmov, ymov, walkLines);
                 }
@@ -2321,11 +2325,11 @@ function gravity() {
             if(doesLineInterceptCircle(x.p1, x.p2, spideyPos, spideyRadius)){
                 //console.log(interceptCircleLineSeg(circle, line));
                 const intercepts = interceptCircleLineSeg(circle, x);
-                if (line > 7) {
+                if (line > 15) {
                     const distA = distToSegmentSquared(spideyPos, x.p1, x.p2);
-                    const distB = distToSegmentSquared({x:0,y:0}, walkLines[7].p1, walkLines[7].p2);
+                    const distB = distToSegmentSquared({x:0,y:0}, walkLines[15].p1, walkLines[15].p2);
                     if (distA < distB){ 
-                        line = 7;
+                        line = 15;
                         };
                 }
                 const distD = distToSegment(spideyPos, x.p1, x.p2);
@@ -2345,7 +2349,7 @@ function gravity() {
                     }
                 }
 
-                if (line < 8) {
+                if (line < 16) {
                     //console.log(line, intercepts, walkLines)
                     walkLines[line].valid = true;
                     if(intercepts.length === 0) {
@@ -2473,15 +2477,15 @@ function gravity() {
             if(doesLineInterceptCircle(x.p1, x.p2, spideyPos, spideyRadius)){
                 //console.log(interceptCircleLineSeg(circle, line));
                 const intercepts = interceptCircleLineSeg(circle, x);
-                if (line > 7) {
+                if (line > 15) {
                     const distA = distToSegmentSquared(spideyPos, x.p1, x.p2);
-                    const distB = distToSegmentSquared({x:0,y:0}, walkLines[7].p1, walkLines[7].p2);
+                    const distB = distToSegmentSquared({x:0,y:0}, walkLines[15].p1, walkLines[15].p2);
                     if (distA < distB){ 
-                        line = 7;
+                        line = 15;
                         };
                 }
 
-                if (line < 8) {
+                if (line < 16) {
                     //console.log(line, intercepts, walkLines)
                     walkLines[line].valid = true;
                     if(intercepts.length === 0) {
@@ -2703,6 +2707,8 @@ function processAI(){
     })
 }
 
+drawObjects();
+
 
 var spaceHeld = 0;
 var jumpCoolDown = 0;
@@ -2716,21 +2722,15 @@ function update(timestamp) {
     lastTimestamp = timestamp;
     
     //reset frame
-    context.clearRect(0, 0, canvas.clientWidth, canvas.height);
+    //context.clearRect(0, 0, canvas.clientWidth, canvas.height);
     vctx.clearRect(0, 0, viewport.clientWidth, viewport.height);
 
-    const w = viewport.width/2;
-    const h = viewport.height/2;
 
-    //source, sourceXY, WH, destXY, dWH
-    vctx.drawImage(canvas, 
-        Math.max(0,Math.min(spideyPos.x - (w * 0.5), canvas.width - w)), Math.min(spideyPos.y - (h * 0.5), canvas.height - h), w, h, 
-        0, 0, w, h)
+    context.drawImage(background, 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height)
 
     //player movement
     move();
     
-    drawObjects();
 
     //gravity + forces
     gravity();
@@ -2742,17 +2742,24 @@ function update(timestamp) {
 
     drawEnemies();
 
+    const w = viewport.width/2;
+    const h = viewport.height/2;
+    //source, sourceXY, WH, destXY, dWH
+    vctx.drawImage(canvas, 
+        Math.max(0,Math.min(spideyPos.x - (w * 0.5), canvas.width - w)), Math.min(spideyPos.y - (h * 0.5), canvas.height - h), w, h, 
+        0, 0, viewport.clientWidth, viewport.clientHeight)
+
     processAI();
 
     //fps counter
     const fps = Math.trunc(Math.round(60 * deltaTime));
-    vctx.font = "42px serif";
+    vctx.font = "22px serif";
     if(fps < 50) {
         vctx.fillStyle = "#ff00ff";
     }else if(fps < 30){
         vctx.fillStyle = "#ff0000";
     }
-    vctx.fillText(`${fps}`, 10, 30)
+    vctx.fillText(`${fps}`, 5, 20)
 
     //spideyPos.x += 0.5;
     // const input1 = false;
@@ -2824,7 +2831,7 @@ function update(timestamp) {
             curYPos = spideyPos.y;
         }
         
-        if (!falling && spaceHeld === 0 && lastTimestamp - jumpCoolDown > 300) {
+        if (!falling && spaceHeld === 0 && lastTimestamp - jumpCoolDown > 600) {
             
         for(i=0; i < legMods.length; i++) {
             if(legMods[i].anim < grabWeb) {
@@ -2840,12 +2847,11 @@ function update(timestamp) {
                 // legMods[i].y = yval;
                 legMods[i].dx = xval;
                 legMods[i].dy = yval;
+                }
             }
-                
-        }
             var speedx = speed.components[0] * 2;
             var speedy = (speed.components[1] - 10) * 3;
-            //console.log(speedx, speedy);
+            console.log(jumpCoolDown, lastTimestamp);
 
             setSpeed(speedx, speedy)
 
