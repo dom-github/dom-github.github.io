@@ -2742,8 +2742,8 @@ function update(timestamp) {
 
     drawEnemies();
 
-    const w = viewport.width/4;
-    const h = viewport.height/4;
+    const w = viewport.width/3;
+    const h = viewport.height/3;
     //source, sourceXY, WH, destXY, dWH
     vctx.drawImage(canvas, 
         Math.max(0,Math.min(spideyPos.x - (w * 0.5), canvas.width - w)), Math.min(spideyPos.y - (h * 0.5), canvas.height - h), w, h, 
