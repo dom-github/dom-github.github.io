@@ -1,0 +1,55 @@
+body {
+    font-family: 'Aclonica';font-size: 60px;
+    color: yellow;
+    background-color: #743e50;
+    width: 100%;
+    height: 100%;
+}
+
+#tattu {
+   position: absolute;
+   z-index: 1;
+   left: 20%;
+   top: 5%;
+   scale: 80%;
+}
+
+#merlinesText {
+    z-index: 3;
+    position: absolute;
+    width: 56%;
+    height: 89%;
+    top: 10%;
+    left: 42%;
+ }
+ #merlinsText {
+     z-index: 3;
+     position: absolute;
+     width: 100%;
+     height: 100%;
+  }
+
+
+#wizard {
+    z-index: -1;
+    position: absolute;
+    margin: 0 auto;
+    bottom: 734px;
+ }
+
+ #merline {
+     
+     z-index: -1;
+     position: absolute;
+  }
+
+ #canvas {
+    z-index: 0;
+    position: absolute;
+    margin: 0 auto;
+ }
+
+ #merlineshand {
+    z-index: 1;
+    position: absolute;
+ }

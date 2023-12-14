@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fog Effect</title>
+  <style>
+    /* Add your CSS styling here */
+    canvas {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="myCanvas" width="400" height="400"></canvas>
+
+  <script type="module">
+    import {PerlinNoise} from "/perlin.js";
+    // Get the canvas element and its 2D rendering context
+    const canvas = document.getElementById('myCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Set the fog effect parameters
+    const fogColor = 'rgba(255, 255, 255, 0.1)'; // Fog color and opacity
+    const noiseScale = 0.01; // Scale of the noise pattern
+
+    // Generate a random noise pattern
+    function generateNoisePattern() {
+      const imageData = ctx.createImageData(canvas.width, canvas.height);
+      const pixels = imageData.data;
+
+      for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x++) {
+          //const noiseValue = Math.random() * 255;
+          const index = (y * canvas.width + x) * 4;
+          const size = 10;
+          const x1 = x / canvas.width;
+          const y1 = y / canvas.height;
+          const noiseValue = 255 * PerlinNoise.noise(size*x1, size*y1, 6);
+
+          pixels[index] = noiseValue; // Red
+          pixels[index + 1] = noiseValue; // Green
+          pixels[index + 2] = noiseValue; // Blue
+          pixels[index + 3] = 255; // Alpha
+        }
+      }
+
+      return imageData;
+    }
+
+    // Apply the fog effect using the noise pattern
+    function applyFogEffect() {
+      // Clear the canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Generate the noise pattern
+      const noisePattern = generateNoisePattern();
+
+      // Draw the noise pattern with the fog color
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = fogColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Apply the noise pattern as an alpha mask
+      ctx.globalCompositeOperation = 'destination-in';
+      ctx.putImageData(noisePattern, 0, 0);
+    }
+
+    // Call the function to apply the fog effect
+    applyFogEffect();
+  </script>
+</body>
+</html>
