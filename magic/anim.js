@@ -1,8 +1,16 @@
+import {tales} from "./fragments.js";
+
 //const merlinTest = "WELCOME young apprentice, DARE ye enter mine shoppe? For I am MERLINE and this is MY SHOPPE! Behold I am Testing Brother Merline's FINE empoareum of Verily Good Goods ETC and long writing test for wraparound function thanks to mizir. Lo! What item of the Magi wish ye to behold? And such and so forth and et cetera... We can fit even more text here and so, let us do so";
 //const merlinTest = "Quite unlike you to be so LATE in your return, mine Apprentice... I have heard that you are Quite Frustrating to the mayor of our local TOWNE, wherein I keep mine EMPOREUM of Arcaine Objekts..."
 //const merlinTest = "Howdy stranger! Shoot, times sure do be darn tootin' and tough all round an' heck, why don'tcha come on over here, give Merline a big ol' sloppy KISS!"
 //const merlinTest = "It has been several DAYS since my last Encounter with the wicked DAEDALUS, my apprentice... I am still weary from the strain of our Great Battle atop the ancient Mountain Of Misterie. Allow me time to recover my STRENGTH"
 
+const merlinIntro = [
+  "Ah, greetings my apprentice. It is so very GOOD to welcome you here to mine EMPOREUM of Mysterious Objeckts...",
+    "Would you like to hear a tale from the great beyond?",
+    "Let me see, here..."
+]
+  
 const merlinTest = "Ah, young apprentice! 'Tis a task I have for thee, an errand of utmost importance, \
 fraught with peril and adventure. Listen closely as I paint the scene"
 
@@ -53,10 +61,63 @@ const alphabet = [
   "Zoratum",
 ]
 
-const newStory = ["Ah, greetings my apprentice, it is so very GOOD to welcome you here to mine EMPOREUM of Mysterious Objeckts",
- "Now, are you here to buy something? A spell, a teacup, the liver of an ignominious lizard, something on those lines, eh? I can get you almost anything", " "]
 
-let textSubject = newStory;
+let time = 0;
+let textTime = 0;
+
+
+
+function splitStringAtLastSpace(str, chunkSize) {
+  let result = [];
+  let start = 0;
+
+  while (start < str.length) {
+      let end = Math.min(start + chunkSize, str.length);
+      let chunk = str.substring(start, end);
+
+      // Find the last space in the current chunk
+      let lastSpaceIndex = chunk.lastIndexOf(' ');
+      let firstTabIndex = chunk.indexOf('	'); //poem detector
+      let lastDotIndex = chunk.lastIndexOf('.');
+      let lastBangIndex = chunk.lastIndexOf('!');
+      let lastQMarkIndex = chunk.lastIndexOf('?');
+
+      // If there's a space, split at that space; otherwise, split at chunkSize
+      if (firstTabIndex !== -1) {
+        end = start + firstTabIndex;
+        while(str.charAt(end+1) === '	') {
+          end++
+        }
+      } else if (lastDotIndex !== -1) {
+        end = start + lastDotIndex;
+      } else if (lastBangIndex !== -1){
+        end = start + lastBangIndex;
+      } else if (lastQMarkIndex !== -1){
+        end = start + lastQMarkIndex;
+      } else if (lastSpaceIndex !== -1){
+        end = start + lastSpaceIndex;
+      }
+
+      end = str.charAt(end+1) === "\"" ? end+2 : end;
+      end = str.charAt(end+1) === "\'" ? end+2 : end;
+      end = str.charAt(end+1) === "\)" ? end+2 : end;
+      end = str.charAt(end+1) === "\]" ? end+2 : end;
+      end = str.charAt(end+1) === "\}" ? end+2 : end;
+
+      end++; 
+      result.push(str.substring(start, end).trim());
+      start = end;
+  }
+
+  return result;
+}
+
+
+// const tale = Math.floor(tales.length * Math.random());
+// const newStory = splitStringAtLastSpace(tales[tale], 296)
+
+// let textSubject = newStory;
+let textSubject = merlinIntro;
 let textParagraph = 0;
 let readyNext;
 
@@ -73,7 +134,11 @@ function getLines(ctx, text, maxWidth, extra) {
       if (i === words.length - 1){
         width += ctx.measureText(extra).width;
         if(readyNext){
-          width += ctx.measureText("...").width;
+          width += ctx.measureText(".?.?.?").width;
+          // const dotLen = ctx.measureText(".").width;
+          // console.log(dotLen)
+          // let elipseAnim = ((textTime % 48) / 12);
+          // width -= Math.floor(elipseAnim) * 22;
         }
       }
       const push = lines.length >= 2 ? 10 : 100;
@@ -112,6 +177,19 @@ window.onload = () => {
   MRL.drawImage(merlinbg,0,0);
 
 
+
+
+
+  function isLetter(c) {
+    return c.toLowerCase() != c.toUpperCase();
+  }
+
+  function isCapitalLetter(c) {
+    return isLetter(c) && c != c.toLowerCase();
+  }
+
+
+
   //Nice fonts
 
   //Courgette + Aclonica (current)
@@ -127,45 +205,77 @@ window.onload = () => {
       let elipseAnim = ((textTime % 48) / 12);
       //elipseAnim = elipseAnim > 1 ? 1 - elipseAnim : elipseAnim;
       //console.log(elipseAnim)
-      curString += elipseAnim > 1 ? "." : "";
-      curString += elipseAnim > 2 ? "." : "";
-      curString += elipseAnim > 3 ? "." : "";
       var wordLength = "";
-      for(i=0;i<25;i++){
+      for(let i=0;i<25;i++){
         const nextChar = curString.charAt(Math.round(textTime/2) + i);
-        if(nextChar === " "){
+        if(nextChar === " " || nextChar === "."){
           i = 26;
         } else {
           wordLength += nextChar;
         }
       }
+
+      //console.log(curString.charAt(curString.length - 1))
+      const lastChar = curString.charAt(curString.length - 1);
+      const lastChar2 = curString.charAt(curString.length - 2);
+      const lastChar3 = curString.charAt(curString.length - 3);
+      const lastChar4 = curString.charAt(curString.length - 4);
+      var endEll = "."
+      var erasePunct = 0;
+      if (lastChar === "." || lastChar === "?" || lastChar === "," || lastChar === "!" ) {
+        endEll = lastChar;
+        erasePunct++;
+        erasePunct += lastChar2 === "." || lastChar2 === "…" ? 1 : 0; 
+        erasePunct += lastChar3 === "." ? 1 : 0; 
+        erasePunct += lastChar4 === "." ? 1 : 0; 
+        console.log(lastChar, lastChar2, lastChar3, lastChar4, erasePunct)    
+      }
+
+      erasePunct += lastChar === "…" ? 1 : 0;
+
+
+      curString = curString.slice(0, curString.length - erasePunct);
+
+      if (lastChar != "\"" && lastChar != ":" && lastChar != ";" && lastChar != ")" && lastChar != "]" && lastChar != "}") {
+        curString += elipseAnim > 1 ? "." : "";
+        curString += elipseAnim > 2 ? "." : "";
+        curString += elipseAnim > 3 ? endEll : "";
+      }
       var string = curString.slice(0, Math.round(textTime/2));
       const dropChar = string.charAt(0);
-      const cutString = string.slice(1);
       const dropOffsetPre = dropChar === "J" ? 30 : 20;
-      var dropOffsetPost = 0;
-      dropOffsetPost += dropChar === "H" 
-                      || dropChar === "F"
-                      || dropChar === "K"
-                      || dropChar === "M"
-                      || dropChar === "P"
-                      || dropChar === "R"
-                      || dropChar === "V"
-                      || dropChar === "Z" ? 5 : 0;
-      dropOffsetPost += dropChar === "E" || dropChar === "I"
-                      || dropChar === "T"
-                      || dropChar === "L"
-                      || dropChar === "N"
-                      || dropChar === "V"
-                      || dropChar === "W"
-                      || dropChar === "Y" ? 10 : 0;
-      dropOffsetPost += dropChar === "J" ? 20 : 0;
+      let lines;
+      let dropLength = 0;
+      const cutString = string.slice(1);
       MRLTXT.font = fontSize + "px Aclonica";
-      const dropLength = MRLTXT.measureText(dropChar).width + dropOffsetPost;
-      const lines = getLines(MRLTXT, cutString, MERLINESTEXT.width - dropLength, wordLength);
+
+      if (isCapitalLetter(dropChar)) {      
+        var dropOffsetPost = 0;
+        dropOffsetPost += dropChar === "H" 
+                        || dropChar === "F"
+                        || dropChar === "K"
+                        || dropChar === "M"
+                        || dropChar === "P"
+                        || dropChar === "R"
+                        || dropChar === "V"
+                        || dropChar === "Z" ? 5 : 0;
+        dropOffsetPost += dropChar === "E" 
+                        || dropChar === "I"
+                        || dropChar === "T"
+                        || dropChar === "L"
+                        || dropChar === "N"
+                        || dropChar === "V"
+                        || dropChar === "W"
+                        || dropChar === "Y" ? 10 : 0;
+        dropOffsetPost += dropChar === "J" ? 20 : 0;
+        dropLength = MRLTXT.measureText(dropChar).width + dropOffsetPost;
+        lines = getLines(MRLTXT, cutString, MERLINESTEXT.width - 66 - dropLength, wordLength);
+      } else {
+        lines = getLines(MRLTXT, string, MERLINESTEXT.width - 66, wordLength);
+      }
       lines.forEach(function(line, i) {
         
-        MRLTXT.fillStyle = i%2 === 0 ? "#ffff00" : "#dddd00";
+        MRLTXT.fillStyle = i%2 === 0 ? "#ffff00" : "#eedd00";
         const drop = i === 0 || i === 1 ? dropLength : 0;
         const push = i > 1 ? i * 20 : 0;
         //console.log(drop)
@@ -174,16 +284,20 @@ window.onload = () => {
         //MRLTXT.shadowBlur = 0;
         MRLTXT.fillText(line, push + drop * 2, (i + 1) * fontSize);
       });
-      MRLTXT.font = fontSize * 2 + "px Courgette";
-      MRLTXT.fillStyle = "yellow";
-        //MRLTXT.shadowColor = "#000";
-        //MRLTXT.shadowBlur = 5;
-        MRLTXT.strokeStyle = "#000";
-        MRLTXT.lineWidth = 10;
-      
-      MRLTXT.strokeText(dropChar, dropOffsetPre, fontSize * 1.7 + 5);
-      //MRLTXT.shadowBlur = 0;
-      MRLTXT.fillText(dropChar, dropOffsetPre, fontSize * 1.7);
+   
+          MRLTXT.strokeStyle = "#000";
+          MRLTXT.lineWidth = 10;
+      if(isCapitalLetter(dropChar))
+      {
+        MRLTXT.font = fontSize * 2 + "px Courgette";
+        MRLTXT.fillStyle = "yellow";
+          //MRLTXT.shadowColor = "#000";
+          //MRLTXT.shadowBlur = 5;
+        
+        MRLTXT.strokeText(dropChar, dropOffsetPre, fontSize * 1.7 + 5);
+        //MRLTXT.shadowBlur = 0;
+        MRLTXT.fillText(dropChar, dropOffsetPre, fontSize * 1.7);
+      }
       if(curString.length < Math.round(textTime/2) && !readyNext) {
         //console.log("Text finished animating")
         readyNext = true;
@@ -192,6 +306,23 @@ window.onload = () => {
   //MRLTXT.fill();
 
   
+document.addEventListener("touchstart", touchStart);
+function touchStart(e) {
+  //shift-swing
+  if (readyNext) {
+      e.preventDefault();
+      readyNext = !readyNext;
+      textTime = 0;
+      if (textSubject.length === textParagraph + 1){
+        console.log(tales.length)
+        const rtale = Math.floor(tales.length * Math.random());
+        textSubject = splitStringAtLastSpace(tales[rtale], 296)
+        textParagraph = 0;
+      } else {
+      textParagraph++;
+      }
+  }
+}
 document.addEventListener("keydown", keyDownHandler, false);
 function keyDownHandler(e) {
   //shift-swing
@@ -199,7 +330,14 @@ function keyDownHandler(e) {
       e.preventDefault();
       readyNext = !readyNext;
       textTime = 0;
+      if (textSubject.length === textParagraph + 1){
+        console.log(tales.length)
+        const rtale = Math.floor(tales.length * Math.random());
+        textSubject = splitStringAtLastSpace(tales[rtale], 296)
+        textParagraph = 0;
+      } else {
       textParagraph++;
+      }
   }
 }
 
@@ -329,8 +467,6 @@ function keyDownHandler(e) {
     }
   }
   
-  let time = 0;
-  let textTime = 0;
   function update() {
   //merlin hand
   //future: small anim
