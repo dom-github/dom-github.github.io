@@ -310,7 +310,6 @@ document.addEventListener("touchstart", touchStart);
 function touchStart(e) {
   //shift-swing
   if (readyNext) {
-      e.preventDefault();
       readyNext = !readyNext;
       textTime = 0;
       if (textSubject.length === textParagraph + 1){
