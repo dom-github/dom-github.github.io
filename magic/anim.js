@@ -309,10 +309,6 @@ window.onload = () => {
 document.addEventListener("touchstart", touchStart);
 function touchStart(e) {
   if (readyNext) {
-<<<<<<< HEAD
-      // e.preventDefault();
-=======
->>>>>>> 408516303b04d599efeb23ee4ab2db33cd8731a5
       readyNext = !readyNext;
       textTime = 0;
       if (textSubject.length === textParagraph + 1){
