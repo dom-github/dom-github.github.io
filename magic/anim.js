@@ -308,9 +308,8 @@ window.onload = () => {
   
 document.addEventListener("touchstart", touchStart);
 function touchStart(e) {
-  //shift-swing
   if (readyNext) {
-      e.preventDefault();
+      // e.preventDefault();
       readyNext = !readyNext;
       textTime = 0;
       if (textSubject.length === textParagraph + 1){
@@ -324,6 +323,7 @@ function touchStart(e) {
   }
 }
 document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("click", touchStart, false);
 function keyDownHandler(e) {
   //shift-swing
   if (e.key === " " && readyNext) {
