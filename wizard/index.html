@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link href="https://db.onlinewebfonts.com/c/8fcba25cad7e455d9c900464ec6e7fe3?family=F1499+Alde+Manuce+Pro+Normal" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wizard's Shop</title>
+  <style>
+    /* Global styles */
+    /* Ensure the root elements cover the full viewport */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: black; 
+      font-size: 1.4em;
+    }
+    body {
+      font-family: "F1499 Alde Manuce Pro Normal";
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .square-container {
+      position: relative;
+      width: 100vmin;   /* vmin is the smaller of viewport width and height */
+      height: 100vmin;
+      background-color: white; 
+      /* Optional: add a border or box-shadow for clarity */
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+    /* Background layer */
+    .background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('assets/img/background.png');
+      background-size: cover;
+      z-index: 1;
+    }
+/* Wizard container layer */
+.wizard-container {
+  position: relative;
+  top: 25%;
+  left: 50%;
+  transform: translate(-50%, -25%);
+  z-index: 2;
+  width: 50%; 
+  max-width: 100%; 
+  /* You can optionally constrain the overall container size if desired */
+  /* width: 800px; or similar */
+}
+
+
+/* Remove the forced 100% rules from these classes */
+.wizard-body, .wizard-hands, .crystal-ball {
+  position: absolute;
+  max-width: 100%;  /* You can keep this to prevent overflow if needed */
+  /* Remove: width: 100%; height: 100%; */
+}
+
+/* Text Box Container: scales with the screen, anchored above the bottom */
+.text-box {
+  position: absolute;
+  left: 5%;            /* 10% margin on left */
+  width: 90%;           /* 80% of the viewport width */
+  bottom: 10%;          /* Distance from the bottom (adjust as needed) */
+  aspect-ratio: 4503 / 1290;   /* Adjust to your image’s intrinsic width/height ratio */
+  /* If aspect-ratio isn’t supported in some browsers, you can add a fallback using a pseudo-element */
+  z-index: 3;
+}
+
+/* The Background fills the entire text-box container */
+.text-box-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('assets/img/text_mouse.png');
+  background-size: 100% 100%;  /* Scales the image exactly to the container */
+  background-repeat: no-repeat;
+  pointer-events: none;        /* So that background doesn’t block any interactions */
+}
+
+/* Text Container: positioned inside the text box with a bit of padding that scales */
+.text-container {
+  position: absolute;
+  /* Adjust these percentages to match the “printable” area inside your background image */
+  top: 25%;
+  left: 21%;
+  width: 70%;
+  height: 50%;
+  overflow-y: auto;
+  font-size: 1rem; /* Use rem or other relative units so the size scales if needed */
+  color: #CA7231;
+  padding: 0px;
+  box-sizing: border-box;
+  /* border: 2.5px solid #E7E7C6; */
+  scrollbar-width: none; 
+  -ms-overflow-style: none;
+  }
+  .text-container::-webkit-scrollbar {
+    display: none; /* Hides scrollbar on Chrome/Safari */
+  }
+
+
+/* The options-bar now acts as an aspect-ratio container anchored at the very bottom */
+.options-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  /* Use the aspect-ratio property (supported in modern browsers) to calculate height
+     For a 5000x1667 background, the container’s height will be ~33.34% of the viewport width */
+  aspect-ratio: 5000 / 907;
+  z-index: 4;
+  /* (For browsers that don’t support aspect-ratio, see the "fallback" comment below.) */
+}
+
+
+/* The background image fills the container exactly */
+.options-background {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('assets/img/toolbar_bg.png');
+  background-size: 100% 100%;  /* Forces the image to scale exactly with the container */
+  background-position: bottom;
+  z-index: 5;
+}
+
+/* Instead of using flexbox (which might not yield pixel‑perfect, absolute positions), 
+   we let each button be absolutely positioned relative to the container. */
+.options-buttons {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 4; /* ensure buttons are above the background */
+}
+
+/* Remove any fixed-size flex rules—and use absolute positioning for each button.
+   Each button’s size and position is set in percentages so they all scale as the container scales. */
+.button {
+  position: absolute;
+  background-size: contain;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  /* For example, if each button should be about 5% of the container's width: */
+  width: 13%;
+  aspect-ratio: 1 / 1; 
+}
+
+/* 
+Example positions for each button – adjust these percentages to match the intended pixel‑perfect layout.
+These positions are calculated relative to the container:
+   - left: 0% is the left edge, and top: 0% is the top edge of the .options-bar.
+*/
+
+#option1 { left: 1%;  top: 42%; }
+#option2 { left: 18%;  top: 42%; }
+#option3 { left: 36%; top: 12%; width: 16%; }
+#option4 { left: 54%; top: 40%; width: 12%;}
+#option5 { left: 70%; top: 40%; }
+#option6 { left: 86%; top: 15%; width: 16%;}
+
+  </style>
+  <script>
+    // Placeholder for dynamic JS if you need additional interactive behaviors in the future.
+    // window.onload = function () {
+    //   console.log("Wizard shop interface loaded and ready!");
+    // };
+    // function setNaturalWidth(imgSelector) {
+    // const images = document.querySelectorAll(imgSelector);
+    
+    // images.forEach(img => {
+    //     img.onload = function() {
+    //         this.style.width = this.naturalWidth + "px";
+    //     };
+    // });
+// }
+
+// Example usage: Run this function after images are loaded.
+//setNaturalWidth("img"); // Targets all <img> elements
+
+  </script>
+</head>
+<body>
+  <div class = "square-container">
+    <div class="background"></div>
+
+    <div class="wizard-container">
+      <img src="assets/img/wizard.png" alt="Wizard Body" class="wizard-body" />
+      <img src="assets/img/wizard_crystal.png" alt="Crystal Ball" class="crystal-ball" />
+      <img src="assets/img/wizard_hands.png" alt="Wizard Hands" class="wizard-hands" />
+    </div>
+
+    <div class="text-box">
+      <div class="text-box-background"></div>
+      <div class="text-container">
+        <p>Welcome to my shop..! I apologize, I am a little unprepared... If you would like to read a Scroll, please return forthwith!</p>
+      </div>
+    </div>
+  <div class="options-bar">
+      <div class="options-background"></div>
+      <div class="options-buttons">
+        <div class="button" id="option1" style="background-image: url('assets/img/toolbar_frame.png');"></div>
+        <div class="button" id="option2" style="background-image: url('assets/img/toolbar_helpbtn.png');"></div>
+        <div class="button" id="option3" style="background-image: url('assets/img/toolbar_quillbtn.png');"></div>
+        <div class="button" id="option4" style="background-image: url('assets/img/toolbar_book.png');"></div>
+        <div class="button" id="option5" style="background-image: url('assets/img/toolbar_menubtn.png');"></div>
+        <div class="button" id="option6" style="background-image: url('assets/img/toolbar_searchbtn.png');"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
