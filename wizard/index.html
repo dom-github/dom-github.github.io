@@ -61,7 +61,9 @@
 /* Remove the forced 100% rules from these classes */
 .wizard-body, .wizard-hands, .crystal-ball {
   position: absolute;
-  max-width: 100%;  /* You can keep this to prevent overflow if needed */
+  left: 15px;
+  top: -85px;
+  max-width: 110%;  /* You can keep this to prevent overflow if needed */
   /* Remove: width: 100%; height: 100%; */
 }
 
@@ -135,7 +137,7 @@
   background-image: url('assets/img/toolbar_bg.png');
   background-size: 100% 100%;  /* Forces the image to scale exactly with the container */
   background-position: bottom;
-  z-index: 5;
+  z-index: 4;
 }
 
 /* Instead of using flexbox (which might not yield pixel‑perfect, absolute positions), 
@@ -146,7 +148,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 4; /* ensure buttons are above the background */
+  z-index: 5; /* ensure buttons are above the background */
 }
 
 /* Remove any fixed-size flex rules—and use absolute positioning for each button.
@@ -175,6 +177,36 @@ These positions are calculated relative to the container:
 #option6 { left: 86%; top: 15%; width: 16%;}
 
   </style>
+</head>
+<body>
+  <div class = "square-container">
+    <div class="background"></div>
+
+    <div class="wizard-container">
+      <img src="assets/img/wizard.png" alt="Wizard Body" class="wizard-body" />
+      <img src="assets/img/wizard_crystal.png" alt="Crystal Ball" class="crystal-ball" />
+      <img src="assets/img/wizard_hands.png" alt="Wizard Hands" class="wizard-hands" />
+    </div>
+
+    <div class="text-box">
+      <div class="text-box-background"></div>
+      <div class="text-container">
+        <p id="wizard-text">Welcome to my shop..! I apologize, I am a little unprepared... If you would like to read a Scroll, please return forthwith!</p>
+      </div>
+    </div>
+  <div class="options-bar">
+      <div class="options-buttons">
+        <div class="button" id="option1" style="background-image: url('assets/img/toolbar_frame.png');"></div>
+        <div class="button" id="option2" style="background-image: url('assets/img/toolbar_helpbtn.png');"></div>
+        <div class="button" id="option3" style="background-image: url('assets/img/toolbar_quillbtn.png');"></div>
+        <div class="button" id="option4" style="background-image: url('assets/img/toolbar_book.png');"></div>
+        <div class="button" id="option5" style="background-image: url('assets/img/toolbar_menubtn.png');"></div>
+        <div class="button" id="option6" style="background-image: url('assets/img/toolbar_searchbtn.png');"></div>
+      </div>
+      <div class="options-background"></div>
+    </div>
+  </div>
+</body>
   <script>
     // Placeholder for dynamic JS if you need additional interactive behaviors in the future.
     // window.onload = function () {
@@ -193,35 +225,14 @@ These positions are calculated relative to the container:
 // Example usage: Run this function after images are loaded.
 //setNaturalWidth("img"); // Targets all <img> elements
 
+    //options loop
+    const text = document.getElementById("wizard-text")
+    for(let i=0; i<6; i++){
+      const button = document.getElementById(`option${i+1}`);
+      button.onclick = () => {
+        console.log("LOG")
+        text.innerHTML = `button ${i+1}`
+      }
+    }
   </script>
-</head>
-<body>
-  <div class = "square-container">
-    <div class="background"></div>
-
-    <div class="wizard-container">
-      <img src="assets/img/wizard.png" alt="Wizard Body" class="wizard-body" />
-      <img src="assets/img/wizard_crystal.png" alt="Crystal Ball" class="crystal-ball" />
-      <img src="assets/img/wizard_hands.png" alt="Wizard Hands" class="wizard-hands" />
-    </div>
-
-    <div class="text-box">
-      <div class="text-box-background"></div>
-      <div class="text-container">
-        <p>Welcome to my shop..! I apologize, I am a little unprepared... If you would like to read a Scroll, please return forthwith!</p>
-      </div>
-    </div>
-  <div class="options-bar">
-      <div class="options-background"></div>
-      <div class="options-buttons">
-        <div class="button" id="option1" style="background-image: url('assets/img/toolbar_frame.png');"></div>
-        <div class="button" id="option2" style="background-image: url('assets/img/toolbar_helpbtn.png');"></div>
-        <div class="button" id="option3" style="background-image: url('assets/img/toolbar_quillbtn.png');"></div>
-        <div class="button" id="option4" style="background-image: url('assets/img/toolbar_book.png');"></div>
-        <div class="button" id="option5" style="background-image: url('assets/img/toolbar_menubtn.png');"></div>
-        <div class="button" id="option6" style="background-image: url('assets/img/toolbar_searchbtn.png');"></div>
-      </div>
-    </div>
-  </div>
-</body>
 </html>

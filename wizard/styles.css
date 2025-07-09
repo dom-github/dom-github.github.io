@@ -1,0 +1,27 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 90%;
+  }    
+   
+      body {
+        font-family: "Open Sans", sans-serif;
+        font-weight: bold;
+        margin: 0;
+        padding: 0;
+        background-color: #4e4949;
+        color: #C7C7C6;
+        text-shadow: 
+          -0.5px -0.5px 0 #20201e,  
+           0.5px -0.5px 0 #20201e,
+          -0.5px  0.5px 0 #20201e,
+           0.5px  0.5px 0 #20201e;
+        background-image: url('assets/img/background.png');
+        background-size: cover;
+        transition: background 1.5s ease-in-out;
+      }
+      h1, p {
+        text-align: center;
+        margin-bottom: 30px; 
+      }
+  
